@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import axios from "axios";
+import Axios from 'axios'
 
 export default function Signin() {
     const [email, setEmail] = useState("admin@consultadd.com");
@@ -22,6 +22,20 @@ export default function Signin() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+
+
+    const httpClient = Axios.create({
+        baseURL: process.env.NEXT_PUBLIC_BASE_URL!,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        withCredentials: true,
+        // xsrfCookieName: 'XSRF-TOKEN',
+        // withXSRFToken: true,
+    })
+
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,10 +49,10 @@ export default function Signin() {
         }
 
         try {
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+            const response = await httpClient.post(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`,
                 { email, password },
-                { withCredentials: true }
+                { withCredentials: true, headers: { "Content-Type": "application/json" } },
             );
 
             console.log("Login successful:", response.data);
