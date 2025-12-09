@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/shared/navbar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -391,10 +391,10 @@ export default function CallTranscriptPage() {
                         row.clientReaction?.toLowerCase().includes("positive")
                           ? "default"
                           : row.clientReaction
-                              ?.toLowerCase()
-                              .includes("negative")
-                          ? "destructive"
-                          : "secondary"
+                            ?.toLowerCase()
+                            .includes("negative")
+                            ? "destructive"
+                            : "secondary"
                       }
                     >
                       {row.clientReaction?.split(" - ")[0] || "Neutral"}

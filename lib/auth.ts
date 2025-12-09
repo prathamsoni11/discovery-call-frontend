@@ -1,4 +1,3 @@
-// Authentication utilities
 export interface User {
   email: string;
   name: string;
@@ -18,7 +17,7 @@ export function getUser(): User | null {
   }
 }
 
-export function setUser(user: User): void {
+export async function setUser(user: User): Promise<void> {
   localStorage.setItem("user", JSON.stringify(user));
   localStorage.setItem("isAuthenticated", "true");
 }

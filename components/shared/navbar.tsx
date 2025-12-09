@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getUser, clearUser } from "@/lib/auth";
 import { useEffect, useState } from "react";
+import { clearCookies } from "@/lib/actions";
 
 interface NavbarProps {
   title: string;
@@ -34,9 +35,10 @@ export function Navbar({ title, showBack = false }: NavbarProps) {
     setUser(getUser());
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     clearUser();
-    router.push("/");
+    await clearCookies();
+    router.push("/signin");
   };
 
   const handleBack = () => {

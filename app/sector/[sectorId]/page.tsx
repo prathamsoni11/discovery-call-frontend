@@ -7,7 +7,7 @@ import { Company } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/shared/navbar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -452,8 +452,8 @@ export default function SectorPage() {
                           problem.severity === "High"
                             ? "destructive"
                             : problem.severity === "Medium"
-                            ? "default"
-                            : "secondary"
+                              ? "default"
+                              : "secondary"
                         }
                       >
                         {problem.severity}
