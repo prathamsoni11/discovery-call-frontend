@@ -18,8 +18,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import axios from "axios"
-import { log } from "console";
 import { loginAction } from "@/lib/actions/auth";
 
 export function LoginForm({
@@ -41,7 +39,20 @@ export function LoginForm({
         setIsLoading(false);
         return;
       }
-      const response = await loginAction({ email, password });
+      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + '/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Login failed');
+      }
+
+      const response = await res.json();
+      // const response = await loginAction({ email, password });
 
       console.log("Login successful:", response);
 
