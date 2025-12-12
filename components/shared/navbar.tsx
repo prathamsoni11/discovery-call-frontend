@@ -22,6 +22,7 @@ interface NavbarProps {
 
 export function Navbar({ title, showBack = false }: NavbarProps) {
     const router = useRouter();
+    
     const [user, setUser] = useState<{
         email: string;
         name: string;

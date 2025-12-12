@@ -34,7 +34,7 @@ interface Industry {
 
 export default function Dashboard() {
   const router = useRouter();
-  // const [industries, setIndustries] = useState<Industry[]>([]);
+
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [loading, setLoading] = useState(true);
 

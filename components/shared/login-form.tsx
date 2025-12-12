@@ -39,25 +39,12 @@ export function LoginForm({
         setIsLoading(false);
         return;
       }
-      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + '/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
 
-      if (!res.ok) {
-        throw new Error('Login failed');
-      }
-
-      const response = await res.json();
-      // const response = await loginAction({ email, password });
+      const response = await loginAction({ email, password });
 
       console.log("Login successful:", response);
 
-      // router.push("/");
+      router.push("/");
     } catch (error) {
       console.error("Error during login:", error);
       alert("Login failed. Please check your credentials and try again.");
