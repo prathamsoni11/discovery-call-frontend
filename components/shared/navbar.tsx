@@ -14,31 +14,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useUser } from "@/context/auth";
+import { clearCookies } from "@/lib/actions/auth";
 
 interface NavbarProps {
     title: string;
     showBack?: boolean;
-}
-
-export function Navbar({ title, showBack = false }: NavbarProps) {
-    const router = useRouter();
-    
-    const [user, setUser] = useState<{
+    data?: {
         email: string;
         name: string;
-        role: string;
-    } | null>(null);
+    }
+}
+
+export function Navbar({ title, showBack = false, data }: NavbarProps) {
+    const router = useRouter();
+    const { user, setUser } = useUser();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
-        // setUser(getUser());
+        if (data) {
+            setUser(data);
+        }
     }, []);
 
     const handleLogout = async () => {
-        // clearUser();
-        // await clearCookies();
-        router.push("/signin");
+        await clearCookies();
+        router.push("/login");
     };
 
     const handleBack = () => {
@@ -68,11 +70,6 @@ export function Navbar({ title, showBack = false }: NavbarProps) {
                             </div>
                         </div>
                     </div>
-
-
-                </div>
-
-                <div className="flex items-center gap-3">
                     {mounted && user && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -100,9 +97,9 @@ export function Navbar({ title, showBack = false }: NavbarProps) {
                                         <p className="text-xs leading-none text-muted-foreground">
                                             {user.email}
                                         </p>
-                                        <p className="text-xs leading-none text-muted-foreground mt-1">
+                                        {/* <p className="text-xs leading-none text-muted-foreground mt-1">
                                             {user.role}
-                                        </p>
+                                        </p> */}
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />

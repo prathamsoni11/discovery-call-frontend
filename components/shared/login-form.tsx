@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { loginAction } from "@/lib/actions/auth";
+import { useUser } from "@/context/auth";
 
 export function LoginForm({
   className,
@@ -29,6 +30,7 @@ export function LoginForm({
   const [password, setPassword] = useState("Admin@123");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +44,12 @@ export function LoginForm({
 
       const response = await loginAction({ email, password });
 
+      if (response.error) {
+        alert(response.error);
+        setIsLoading(false);
+        return;
+      }
       console.log("Login successful:", response);
-
       router.push("/");
     } catch (error) {
       console.error("Error during login:", error);
@@ -90,7 +96,9 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button type="submit" disabled={isLoading}>{isLoading ? "Loging in..." : "Log In"}</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Logging in..." : "Log In"}
+                </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="#">Sign up</a>
                 </FieldDescription>
