@@ -32,7 +32,7 @@ export const loginAction = async (data: {
           secure: true,
           sameSite: "none",
           path: "/",
-          maxAge: 2592000, // 30 days
+          maxAge: 86400,
         });
       }
     }
