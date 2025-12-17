@@ -116,20 +116,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Prevent layout shift on hover */
-  a,
-  button {
+  a, button {
     -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Smooth transitions without layout shift */
-  .transition-shadow {
-    transition: box-shadow 0.2s ease-in-out;
   }
 }

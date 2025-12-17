@@ -2,27 +2,33 @@ export interface Industry {
   id: string;
   industryCode: string;
   name: string;
+  description?: string;
+  icon?: string;
 }
 
 export interface Company {
   id: string;
   companyName: string;
-  stage: string;
-  notesLink: string;
+  domain: string;
+  industry: string;
+  subIndustry: string;
   createdAt: string;
-  companyClassification: {
+  // Legacy fields for backward compatibility
+  stage?: string;
+  notesLink?: string;
+  companyClassification?: {
     domain: string;
     industry: string;
     subIndustry: string;
   };
-  callSummary: string;
-  clientRepresentative: {
+  callSummary?: string;
+  clientRepresentative?: {
     name: string;
     title: string | null;
     department: string | null;
   };
-  consultAddRepresentative: string;
-  clientProblems: ClientProblem[];
+  consultAddRepresentative?: string;
+  clientProblems?: ClientProblem[];
   solutionsPitched?: SolutionPitched[];
   competitorsMentioned?: CompetitorMention[];
 }
@@ -33,37 +39,30 @@ export interface Call {
   stage: string;
   notesLink: string;
   createdAt: string;
-  companyClassification: {
+  companyId: string;
+  callSummary: string;
+  clientRepresentative: {
+    name: string;
+    title: string | null;
+    department: string | null;
+  };
+  consultAddRepresentative: string;
+  clientProblems: ClientProblem[];
+  solutionsPitched?: SolutionPitched[];
+  competitorsMentioned?: CompetitorMention[];
+  summaryRows?: SummaryTableRow[];
+  solutionDelivered?: string | null;
+  keyTakeaways?: string[];
+  followUpActions?: string[];
+  // Legacy field for backward compatibility
+  companyClassification?: {
     domain: string;
     industry: string;
     subIndustry: string;
   };
-  callSummary: string;
 }
 
-export interface CallTranscript {
-  company_name: string;
-  stage: string;
-  notes_link?: string;
-  processed_at: string;
-  source: string;
-  transcript_length: number;
-  call_summary: string;
-  client_representative: {
-    name: string;
-    title: string;
-    department: string;
-  };
-  consultadd_representative: string;
-  client_problems: ClientProblem[];
-  solutions_pitched: SolutionPitched[];
-  competitors_mentioned: CompetitorMention[];
-  summary_table: SummaryTableRow[];
-  solution_delivered?: string;
-  key_takeaways: string[];
-  follow_up_actions: string[];
-  status: string;
-}
+
 
 export interface ClientProblem {
   problemStatement: string;
@@ -73,21 +72,21 @@ export interface ClientProblem {
 }
 
 export interface SolutionPitched {
-  solution_description: string;
-  addresses_problem: string;
-  fit_label: "Immediate Fit" | "Future Fit";
+  solutionDescription: string;
+  addressedProblem: string;
+  fitLabel: "Immediate Fit" | "Future Fit";
 }
 
 export interface CompetitorMention {
-  name: string;
+  competitorName: string;
   context: string;
   sentiment: "Positive" | "Neutral" | "Negative";
 }
 
 export interface SummaryTableRow {
-  problem_categorized: string;
-  solution_pitched: string;
-  client_objection: string;
-  objection_handling: string;
-  client_reaction: string;
+  problem: string;
+  solutionPitched: string;
+  clientObjection: string;
+  objectionHandling: string;
+  clientReaction: string;
 }

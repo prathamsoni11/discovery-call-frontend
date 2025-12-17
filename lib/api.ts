@@ -1,15 +1,7 @@
-// API Configuration
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://discovery-call-backend-latest-1.onrender.com/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://discovery-call-backend.onrender.com/api";
 
-// Fallback data for industries when API is unavailable
 const FALLBACK_INDUSTRIES = [
-  {
-    id: "1",
-    name: "Technology & Software",
-    industryCode: "TECHNOLOGY_SOFTWARE",
-  },
+  { id: "1", name: "Technology & Software", industryCode: "TECHNOLOGY_SOFTWARE" },
   { id: "2", name: "Healthcare", industryCode: "HEALTHCARE" },
   { id: "3", name: "Financial Services", industryCode: "FINANCIAL_SERVICES" },
   { id: "4", name: "Manufacturing", industryCode: "MANUFACTURING" },
@@ -17,77 +9,48 @@ const FALLBACK_INDUSTRIES = [
   { id: "6", name: "Education", industryCode: "EDUCATION" },
 ];
 
-// Generic fetch wrapper with error handling
-async function apiFetch<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T | null> {
+// Client-side API fetch (for non-authenticated calls or when token is passed)
+async function apiFetch<T>(endpoint: string, token?: string, options?: RequestInit): Promise<T | null> {
   try {
-    const url = `${API_BASE_URL}${endpoint}`;
-    console.log(`Fetching: ${url}`);
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    // Add Authorization header if token is provided
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
-    const data = await response.json();
-    console.log(`Success: ${endpoint}`, data);
-    return data;
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers,
+      ...options,
+    });
+
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    return await response.json();
   } catch (error) {
     console.error(`Error fetching ${endpoint}:`, error);
     return null;
   }
 }
 
-/**
- * Fetch all industries
- * @returns Array of industries or fallback data
- */
+
+
+
+
 export async function fetchIndustries() {
-  const data = await apiFetch<any[]>("/industries");
-
-  if (!data || data.length === 0) {
-    console.log("Using fallback industries data");
-    return FALLBACK_INDUSTRIES;
-  }
-
-  return data;
+  const data = await apiFetch<unknown[]>("/industries");
+  return data?.length ? data : FALLBACK_INDUSTRIES;
 }
 
-/**
- * Fetch companies/calls by industry code
- * @param industryCode - Industry code (e.g., "technology_software")
- * @returns Array of calls for the specified industry
- */
 export async function fetchCompanies(industryCode: string) {
-  const data = await apiFetch<any[]>(
-    `/calls/industry/${industryCode.toLowerCase()}`
-  );
-  return data || [];
+  return await apiFetch<unknown[]>(`/calls/industry/${industryCode.toLowerCase()}`) || [];
 }
 
-/**
- * Fetch all calls across all industries
- * @returns Array of all calls
- */
 export async function fetchAllCalls() {
-  const data = await apiFetch<any[]>("/calls");
-  return data || [];
+  return await apiFetch<unknown[]>("/calls") || [];
 }
 
-/**
- * Fetch detailed call information by ID
- * @param callId - Unique call identifier
- * @returns Call details or null if not found
- */
 export async function fetchCallTranscript(callId: string) {
-  return await apiFetch<any>(`/calls/${callId}`);
+  return await apiFetch<unknown>(`/calls/${callId}`);
 }

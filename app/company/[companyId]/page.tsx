@@ -3,95 +3,106 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { Company } from "@/types";
+import { Call } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/shared/navbar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { fetchCompanyCallsAction } from "@/lib/actions";
 
 export default function CompanyPage() {
   const router = useRouter();
   const params = useParams();
-  const companyName = decodeURIComponent(params.companyId as string);
-  const [calls, setCalls] = useState<Company[]>([]);
+  const companyId = params.companyId as string;
+  const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
-  const [industryCode, setIndustryCode] = useState<string>("");
+  const [companyName, setCompanyName] = useState<string>("");
 
   useEffect(() => {
-    const auth = localStorage.getItem("isAuthenticated");
-    if (!auth) {
-      router.push("/");
+    if (!localStorage.getItem("isAuthenticated")) {
+      router.push("/login");
       return;
     }
 
-    // Fetch all calls and filter by company name
-    async function loadCalls() {
-      setLoading(true);
-      const { fetchAllCalls } = await import("@/lib/api");
-      const allCalls = await fetchAllCalls();
-
-      // Filter calls by company name (case-insensitive)
-      const companyCalls = allCalls.filter(
-        (call: Company) =>
-          call.companyName.toLowerCase() === companyName.toLowerCase()
-      );
-
-      // Get industry code from first call for breadcrumb
-      if (companyCalls.length > 0) {
-        setIndustryCode(
-          companyCalls[0].companyClassification.industry.toLowerCase()
-        );
+    const loadCalls = async () => {
+      try {
+        console.log("Loading calls for company:", companyId);
+        const result = await fetchCompanyCallsAction(companyId);
+        
+        console.log("Company calls API result:", result);
+        
+        if (result.success && result.data) {
+          const callsData = Array.isArray(result.data) ? result.data : [];
+          console.log("Setting calls data:", callsData.length, "calls");
+          setCalls(callsData);
+          
+          // Set company name from first call if available
+          if (callsData.length > 0) {
+            setCompanyName(callsData[0].companyName);
+          }
+        } else {
+          console.error("Failed to fetch calls:", result.error);
+          setCalls([]);
+        }
+      } catch (error) {
+        console.error("Error in loadCalls:", error);
+        setCalls([]);
       }
-
-      setCalls(companyCalls);
+      
       setLoading(false);
-    }
+    };
 
     loadCalls();
-  }, [router, companyName]);
+  }, [router, companyId]);
 
-  const getStatusVariant = (
-    stage: string
-  ): "default" | "secondary" | "destructive" => {
+  const getStatusVariant = (stage: string): "default" | "secondary" | "destructive" => {
     if (stage.includes("Qualified")) return "default";
     if (stage.includes("Demo")) return "secondary";
+    if (stage.includes("Closed")) return "destructive";
     return "default";
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
-      <Navbar title={companyName} showBack />
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar title="Loading..." showBack />
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-48" />
+            <div className="grid gap-4">
+              {Array.from({ length: 3 }, (_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        {industryCode && (
-          <Breadcrumb className="mb-6">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href={`/sector/${industryCode}`}
-                  className="capitalize"
-                >
-                  {industryCode.replace(/_/g, " ")}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{companyName}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        )}
+  return (
+    <div className="min-h-screen">
+      <Navbar title={companyName || "Company Details"} showBack />
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{companyName || "Company"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-3xl font-bold">Call History</h2>
@@ -100,25 +111,13 @@ export default function CompanyPage() {
           </Badge>
         </div>
 
-        {loading ? (
-          <div className="grid gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <div className="space-y-3">
-                    <div className="h-6 bg-muted rounded w-1/3 animate-pulse" />
-                    <div className="h-4 bg-muted rounded w-2/3 animate-pulse" />
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        ) : calls.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              No calls found for this company.
-            </CardContent>
-          </Card>
+        {calls.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No Calls Found</EmptyTitle>
+              <EmptyDescription>No calls found for this company.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="grid gap-4">
             {calls.map((call) => (
@@ -155,9 +154,9 @@ export default function CompanyPage() {
                         </p>
                         <p className="text-muted-foreground">
                           <span className="font-medium text-foreground">
-                            Industry:
+                            Department:
                           </span>{" "}
-                          {call.companyClassification.subIndustry}
+                          {call.clientRepresentative.department || "N/A"}
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -171,7 +170,7 @@ export default function CompanyPage() {
                           <span className="font-medium text-foreground">
                             Problems:
                           </span>{" "}
-                          {call.clientProblems.length}
+                          {call.clientProblems?.length || 0}
                         </p>
                       </div>
                     </div>
@@ -180,6 +179,20 @@ export default function CompanyPage() {
                         {call.callSummary}
                       </p>
                     </div>
+                    {call.notesLink && (
+                      <div className="mt-3">
+                        <button 
+                          className="text-sm text-blue-600 hover:text-blue-800 underline bg-transparent border-none cursor-pointer p-0"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.open(call.notesLink, '_blank', 'noopener,noreferrer');
+                          }}
+                        >
+                          View Call Recording
+                        </button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </Link>
