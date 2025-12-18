@@ -2,12 +2,12 @@
 
 import { getToken } from "./auth";
 
-export const getIndustries = async () => {
+export const getCallById = async ({ callId }: { callId: string }) => {
   try {
     const token = await getToken();
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/industries`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/calls/${callId}`,
       {
         method: "GET",
         headers: {
@@ -19,14 +19,14 @@ export const getIndustries = async () => {
     );
 
     if (!res.ok) {
-      console.error("Failed to fetch industries:", res.statusText);
-      return [];
+      console.error("Failed to fetch company by ID:", res.statusText);
+      return null;
     }
 
     const data = await res.json();
     return data.data;
   } catch (err) {
-    console.error("Error fetching industries:", err);
-    return [];
+    console.error("Error fetching company by ID:", err);
+    return null;
   }
 };
