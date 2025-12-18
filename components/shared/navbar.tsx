@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import {
     DropdownMenu,
@@ -15,27 +16,29 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useUser } from "@/context/auth";
-import { clearCookies } from "@/lib/actions/auth";
+import { clearCookies, getProfileAction } from "@/lib/actions/auth";
 
 interface NavbarProps {
     title: string;
     showBack?: boolean;
-    data?: {
-        email: string;
-        name: string;
-    }
 }
 
-export function Navbar({ title, showBack = false, data }: NavbarProps) {
+export function Navbar({ title, showBack = false }: NavbarProps) {
     const router = useRouter();
     const { user, setUser } = useUser();
     const [mounted, setMounted] = useState(false);
 
+    const pathname = usePathname();
+
     useEffect(() => {
-        setMounted(true);
-        if (data) {
-            setUser(data);
-        }
+        const fetchProfile = async () => {
+            const data = await getProfileAction();
+            setMounted(true);
+            if (data) {
+                setUser(data);
+            }
+        };
+        fetchProfile();
     }, []);
 
     const handleLogout = async () => {
@@ -48,7 +51,7 @@ export function Navbar({ title, showBack = false, data }: NavbarProps) {
     };
 
     return (
-        <nav className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
+        pathname !== "/login" && (<nav className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center gap-3">
@@ -114,6 +117,6 @@ export function Navbar({ title, showBack = false, data }: NavbarProps) {
                     )}
                 </div>
             </div>
-        </nav>
+        </nav>)
     );
 }
